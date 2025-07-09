@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import {
   CalendarDays,
@@ -13,6 +12,7 @@ import {
   PlusCircle,
   Landmark,
 } from "lucide-react";
+import axiosInstance from "../api/axiosInstance";
 
 const TradeForm = ({ onTradeCreated }) => {
   const { token } = useAuth();
@@ -35,9 +35,12 @@ const TradeForm = ({ onTradeCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3000/api/trades", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axiosInstance.post("/trades", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
       setFormData({
         pair: "",
         dateOpen: "",
@@ -52,7 +55,7 @@ const TradeForm = ({ onTradeCreated }) => {
     } catch (err) {
       console.error("Erreur lors de l'ajout du trade :", err);
     }
-  };
+};
 
   return (
     <div className="flex flex-col md:flex-row gap-8 items-start bg-white/10 p-8 rounded-2xl shadow-xl transition duration-300">
