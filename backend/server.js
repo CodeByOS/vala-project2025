@@ -16,12 +16,14 @@ const app = express();
 
 // Middleware CORS pour le développement uniquement
 if (process.env.NODE_ENV !== 'production') {
-  app.use(
-    cors({
-      origin: 'http://localhost:5173', // URL de votre frontend local (Vite)
-      credentials: true,
-    })
-  );
+  const corsOptions = {
+    origin: 'http://localhost:5173', // URL de votre frontend local (Vite)
+    credentials: true,
+  };
+
+  app.use(cors(corsOptions));
+  // ⚠️ Handle preflight (OPTIONS) requests
+  app.options('*', cors(corsOptions));
 }
 
 // Middleware JSON
@@ -62,7 +64,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // -------------------- Start Server --------------------
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
