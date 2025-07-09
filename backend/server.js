@@ -24,9 +24,11 @@ app.options('*', cors(corsOptions)); // Handle preflight requests
 app.use(express.json());
 
 // Routes de test
-app.get('/', (req, res) => {
-  res.send('API Trading Journal is running ✅');
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (req, res) => {
+    res.send('API Trading Journal is running ✅');
+  });
+}
 
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
