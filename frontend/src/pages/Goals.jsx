@@ -2,10 +2,8 @@
 import { useEffect, useState } from 'react';
 import { FaPlus, FaTrash, FaCheck, FaTimes, FaBullseye, FaChartLine, FaLightbulb } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import { motion } from 'framer-motion';
-
-const API_URL = 'http://localhost:3000/api/goals';
+import axiosInstance from '../api/axiosInstance';
 
 const conseils = [
   {
@@ -48,11 +46,17 @@ const Goals = () => {
     type: 'weekly',
     dueDate: '',
   });
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    // Get token once on mount
+    const storedToken = localStorage.getItem('token');
+    setToken(storedToken || '');
+  }, []);
 
   const fetchGoals = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(API_URL, {
+      const res = await axiosInstance.get('/goals', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (Array.isArray(res.data)) {
@@ -63,12 +67,15 @@ const Goals = () => {
       }
     } catch (error) {
       toast.error('Erreur lors du chargement des objectifs');
+      console.error('Erreur lors du chargement des objectifs:', error);
     }
   };
 
   useEffect(() => {
-    fetchGoals();
-  }, []);
+    if (token) {
+      fetchGoals();
+    }
+  }, [token]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -77,8 +84,7 @@ const Goals = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(API_URL, form, {
+      const res = await axiosInstance.post('/goals', form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Objectif ajouté 🎯');
@@ -86,33 +92,34 @@ const Goals = () => {
       setGoals([res.data, ...goals]);
     } catch (error) {
       toast.error("Erreur lors de l'ajout");
+      console.error('Erreur lors de l\'ajout d\'un objectif:', error);
     }
   };
 
   const toggleComplete = async (id, completed) => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.put(
-        `${API_URL}/${id}`,
+      const res = await axiosInstance.put(
+        `/goals/${id}`,
         { completed: !completed },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setGoals(goals.map((goal) => (goal._id === id ? res.data : goal)));
     } catch (error) {
       toast.error('Erreur lors de la mise à jour');
+      console.error('Erreur lors de la mise à jour de l\'objectif:', error);
     }
   };
 
   const deleteGoal = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/${id}`, {
+      await axiosInstance.delete(`/goals/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Objectif supprimé 🗑️');
       setGoals(goals.filter((goal) => goal._id !== id));
     } catch (error) {
       toast.error('Erreur lors de la suppression');
+      console.error('Erreur lors de la suppression de l\'objectif:', error);
     }
   };
 

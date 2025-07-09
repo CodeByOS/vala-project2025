@@ -4,7 +4,6 @@ import TradeForm from "../components/TradeForm";
 import TradeList from "../components/TradeList";
 import CalendarView from "../components/CalendarView";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
 import {
   Loader2,
   Lightbulb,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import globaltrade from "../assets/global-trade.jpg";
+import axiosInstance from "../api/axiosInstance";
 
 const Dashboard = () => {
   const { token } = useAuth();
@@ -21,7 +21,7 @@ const Dashboard = () => {
 
   const fetchTrades = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/trades", {
+      const res = await axiosInstance.get("/trades", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTrades(res.data);

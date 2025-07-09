@@ -1,5 +1,3 @@
-// backend/server.js
-
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -14,27 +12,23 @@ connectDB();
 
 const app = express();
 
-// Middleware CORS pour le développement uniquement
-if (process.env.NODE_ENV !== 'production') {
-  const corsOptions = {
-    origin: 'http://localhost:5173', // URL de votre frontend local (Vite)
-    credentials: true,
-  };
+const corsOptions = {
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true,
+};
 
-  app.use(cors(corsOptions));
-  // ⚠️ Handle preflight (OPTIONS) requests
-  app.options('*', cors(corsOptions));
-}
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight requests
 
 // Middleware JSON
 app.use(express.json());
 
 // Routes de test
-if (process.env.NODE_ENV !== 'production') {
-  app.get('/', (req, res) => {
-    res.send('API Trading Journal is running ✅');
-  });
-}
+app.get('/', (req, res) => {
+  res.send('API Trading Journal is running ✅');
+});
+
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
 // Importation des routes
 const authRoutes = require('./routes/authRoutes');

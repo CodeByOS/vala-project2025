@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import axiosInstance from "../api/axiosInstance"; // updated import
 import {
   BarChart,
   Bar,
@@ -18,8 +17,6 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import {
-  FiTrendingUp,
-  FiTrendingDown,
   FiPieChart,
   FiBarChart2,
   FiActivity,
@@ -28,7 +25,9 @@ import {
 const STRATEGY_COLORS = ["#7c3aed", "#ec4899", "#0ea5e9"]; // violet, rose, bleu
 
 const Stats = () => {
-  const { token } = useAuth();
+  // No need to get token here if axiosInstance handles it
+  // const { token } = useAuth();
+
   const [strategyStats, setStrategyStats] = useState([]);
   const [monthlyStats, setMonthlyStats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,12 +41,7 @@ const Stats = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:3000/api/trades/strategies/stats",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await axiosInstance.get("/trades/strategies/stats");
       setStrategyStats(res.data);
     } catch (err) {
       console.error("Erreur stats stratégie:", err);
@@ -59,12 +53,7 @@ const Stats = () => {
 
   const fetchMonthlyStats = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:3000/api/trades/stats/monthly",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await axiosInstance.get("/trades/stats/monthly");
       setMonthlyStats(res.data);
     } catch (err) {
       console.error("Erreur évolution mensuelle:", err);
@@ -89,7 +78,6 @@ const Stats = () => {
     ratio: m.total !== 0 ? +(m.totalProfit / m.total).toFixed(2) : 0,
   }));
 
-  // Pour animer les <tr> avec framer-motion
   const MotionTr = motion.tr;
 
   return (
@@ -270,8 +258,8 @@ const Stats = () => {
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
                   labelLine={false}
                 >
-                  <Cell fill="#10b981" /> {/* Vert pour gagnants */}
-                  <Cell fill="#ef4444" /> {/* Rouge pour perdants */}
+                  <Cell fill="#10b981" /> {/* Green for wins */}
+                  <Cell fill="#ef4444" /> {/* Red for losses */}
                 </Pie>
                 <Legend
                   verticalAlign="bottom"
@@ -286,68 +274,51 @@ const Stats = () => {
                     borderRadius: 8,
                     border: "1px solid #ddd",
                   }}
-                  formatter={(value, name) => [`${value} trades`, name]}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Évolution Mensuelle des Profits & Ratio */}
+          {/* Evolution Mensuelle (Ligne) */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-              <FiActivity className="text-pink-600" />
-              Évolution Mensuelle des Profits & Ratio
+              <FiActivity className="text-indigo-600" />
+              Évolution Mensuelle
             </h2>
-            <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={lineData} margin={{ top: 15, right: 30, left: 20, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="month" stroke="#4B5563" tick={{ fontSize: 14, fontWeight: "600" }} />
-                <YAxis
-                  yAxisId="left"
-                  orientation="left"
-                  stroke="#4B5563"
-                  tickFormatter={(value) => `${value} pips`}
-                  tick={{ fontSize: 14 }}
-                />
-                <YAxis
-                  yAxisId="right"
-                  orientation="right"
-                  stroke="#7c3aed"
-                  tickFormatter={(value) => value.toFixed(2)}
-                  tick={{ fontSize: 14 }}
-                />
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={lineData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
+                <XAxis dataKey="month" stroke="#4B5563" />
+                <YAxis yAxisId="left" stroke="#16a34a" />
+                <YAxis yAxisId="right" orientation="right" stroke="#9333ea" />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#fafafa",
                     borderRadius: 8,
                     border: "1px solid #ddd",
                   }}
-                  formatter={(value, name) => {
-                    if (name === "ratio") return value.toFixed(2);
-                    if (name === "profit") return `${value} pips`;
-                    return value;
-                  }}
+                />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  iconSize={12}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 14 }}
                 />
                 <Line
                   yAxisId="left"
                   type="monotone"
                   dataKey="profit"
-                  stroke="#ec4899"
+                  stroke="#16a34a"
                   strokeWidth={3}
-                  dot={{ r: 5 }}
                   activeDot={{ r: 7 }}
-                  name="Profit (pips)"
                 />
                 <Line
                   yAxisId="right"
                   type="monotone"
                   dataKey="ratio"
-                  stroke="#7c3aed"
+                  stroke="#9333ea"
                   strokeWidth={3}
-                  dot={{ r: 5 }}
-                  activeDot={{ r: 7 }}
-                  name="Ratio moyen"
-                  strokeDasharray="5 5"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -359,20 +330,3 @@ const Stats = () => {
 };
 
 export default Stats;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
