@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FaChartLine, FaLightbulb, FaUserShield, FaHandshake } from 'react-icons/fa'
+import { FaChartLine, FaLightbulb, FaUserShield } from 'react-icons/fa'
 import { MdGroups } from 'react-icons/md'
 import { Link } from 'react-router-dom'
 import statsImage from '../assets/about-stats.jpg'
