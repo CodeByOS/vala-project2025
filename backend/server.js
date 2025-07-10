@@ -1,11 +1,10 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
+
 const connectDB = require('./config/db');
 const path = require('path');
-
-// Load environment variables
-dotenv.config();
 
 // Connect to MongoDB
 connectDB();
@@ -50,7 +49,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // -------------------- Serve Frontend in Production --------------------
 
 if (process.env.NODE_ENV === 'production') {
-  const buildPath = path.join(__dirname, 'dist'); // Vite outputs to "dist" by default
+  const buildPath = path.join(__dirname, 'dist'); // <-- NOT 'build' if using Vite
   app.use(express.static(buildPath));
 
   app.get('*', (req, res) => {
