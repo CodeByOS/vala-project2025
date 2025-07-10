@@ -4,53 +4,53 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const path = require('path');
 
-// Charger les variables d’environnement
+// Load environment variables
 dotenv.config();
 
-// Connexion à la base de données MongoDB
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 
+// CORS Configuration
 const corsOptions = {
-  origin: '*', // Your frontend URL
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Vite default
   credentials: true,
 };
-
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle preflight requests
+app.options('*', cors(corsOptions));
 
-// Middleware JSON
+// Middleware
 app.use(express.json());
 
-// Routes de test
+// Test route for dev
 if (process.env.NODE_ENV !== 'production') {
   app.get('/', (req, res) => {
-    res.send('API Trading Journal is running ✅');
+    res.send('✅ API Trading Journal is running');
   });
 }
 
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
-// Importation des routes
+// Import routes
 const authRoutes = require('./routes/authRoutes');
 const tradeRoutes = require('./routes/tradeRoutes');
 const noteRoutes = require('./routes/noteRoutes');
 const goalRoutes = require('./routes/goalRoutes');
 
-// Utilisation des routes
+// Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/trades', tradeRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/goals', goalRoutes);
 
-// Servir les fichiers uploadés
+// Serve uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // -------------------- Serve Frontend in Production --------------------
 
 if (process.env.NODE_ENV === 'production') {
-  const buildPath = path.join(__dirname, 'build');
+  const buildPath = path.join(__dirname, 'dist'); // Vite outputs to "dist" by default
   app.use(express.static(buildPath));
 
   app.get('*', (req, res) => {
@@ -62,5 +62,5 @@ if (process.env.NODE_ENV === 'production') {
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
